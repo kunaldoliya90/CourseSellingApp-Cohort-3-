@@ -1,7 +1,7 @@
-const express = require("express");
-const Router = express.Router;
-// const { Router } = require("router");
+const { Router } = require("express");
 const userRouter = Router();
+// const express = require("express");
+// const Router = express.Router;
 
 
 userRouter.post("/signup", function (req, res) {
