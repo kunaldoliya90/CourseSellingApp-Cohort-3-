@@ -5,8 +5,8 @@ const app = express();
 const PORT = 3000;
 
 // Routes
-app.use("/user", userRouter);
-app.use("/course", courseRouter);
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/course", courseRouter);
 
 //   Server listen
 app.listen(PORT, function (req, res) {
