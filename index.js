@@ -8,6 +8,14 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middlewares
+function userAuth(req, res, next){
+  const email = req.body.email;
+  const password = req.body.password;
+
+  
+}
+
 // Routes
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/course", courseRouter);

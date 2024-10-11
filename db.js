@@ -1,12 +1,5 @@
 const mongoose = require("mongoose");
 
-mongoose
-  .connect(
-    "mongodb+srv://kunaldoliyacohort:Kunal3110kk@cluster-test1.uke29.mongodb.net/coursera-app"
-  )
-  .then(() => console.log("Connected to DB"))
-  .catch((err) => console.error("DB Connection Error:", err));
-
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId;
 
