@@ -1,11 +1,12 @@
 const { Router } = require("express");
-const userRouter = Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-// const userModel = require("../db.js") // This will not work;
 const { userModel, purchaseModel, courseModel } = require("../db");
 const { userMiddleware } = require("../middlewares/user");
 
+const userRouter = Router();
+
+// User Signup Route
 userRouter.post("/signup", async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
 
@@ -15,17 +16,17 @@ userRouter.post("/signup", async (req, res) => {
   }
 
   try {
-    const userExist = await userModel.findOne({ email: email });
+    const userExist = await userModel.findOne({ email });
     if (userExist) {
       return res.status(400).json({ message: "User already exists." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await userModel.create({
-      email: email,
+      email,
       password: hashedPassword,
-      firstName: firstName,
-      lastName: lastName,
+      firstName,
+      lastName,
     });
 
     return res.status(201).json({
@@ -43,7 +44,8 @@ userRouter.post("/signup", async (req, res) => {
   }
 });
 
-userRouter.post("/signin", async function (req, res) {
+// User Signin Route
+userRouter.post("/signin", async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -71,6 +73,7 @@ userRouter.post("/signin", async function (req, res) {
   }
 });
 
+// Course Purchase Route
 userRouter.post("/purchase", userMiddleware, async (req, res) => {
   const userId = req.userId;
   const { courseId } = req.body;
@@ -99,9 +102,8 @@ userRouter.post("/purchase", userMiddleware, async (req, res) => {
 userRouter.get("/preview", async (req, res) => {
   try {
     const courses = await courseModel.find({});
-
     res.status(200).json({
-      courses: courses,
+      courses,
     });
   } catch (error) {
     console.error(error);
@@ -109,13 +111,13 @@ userRouter.get("/preview", async (req, res) => {
   }
 });
 
-userRouter.get("/purchases", userMiddleware, async function (req, res) {
+// User Purchases Route
+userRouter.get("/purchases", userMiddleware, async (req, res) => {
   const userId = req.userId;
   try {
-    const courses = await purchaseModel.find({ userId });
-
+    const purchases = await purchaseModel.find({ userId });
     res.status(200).json({
-      purchases: purchases,
+      purchases,
     });
   } catch (error) {
     console.error(error);
@@ -124,5 +126,5 @@ userRouter.get("/purchases", userMiddleware, async function (req, res) {
 });
 
 module.exports = {
-  userRouter: userRouter,
+  userRouter,
 };
