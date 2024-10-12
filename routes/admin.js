@@ -1,11 +1,12 @@
 const { Router } = require("express");
 const { adminModel, courseModel } = require("../db");
-const user = require("./user");
-const adminRouter = Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { adminMiddleware } = require("../middlewares/admin");
 
+const adminRouter = Router();
+
+// Admin Signup
 adminRouter.post("/signup", async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
 
@@ -72,6 +73,7 @@ adminRouter.post("/signin", async (req, res) => {
   }
 });
 
+// Create Course
 adminRouter.post("/course", adminMiddleware, async (req, res) => {
   const adminId = req.userId;
   const { title, description, imageUrl, price } = req.body;
@@ -95,27 +97,19 @@ adminRouter.post("/course", adminMiddleware, async (req, res) => {
   }
 });
 
-adminRouter.put("/course", adminMiddleware, async function (req, res) {
+// Update Course
+adminRouter.put("/course", adminMiddleware, async (req, res) => {
   const adminId = req.userId;
   const { title, description, price, imageUrl, courseId } = req.body;
 
   try {
     const course = await courseModel.updateOne(
-      {
-        _id: courseId,
-        creatorId: adminId,
-      },
-      {
-        title,
-        description,
-        price,
-        imageUrl,
-        creatorId: adminId,
-      }
+      { _id: courseId, creatorId: adminId },
+      { title, description, price, imageUrl, creatorId: adminId }
     );
 
     res.status(201).json({
-      message: "Course Updated successfully.",
+      message: "Course updated successfully.",
       courseId: course._id,
     });
   } catch (error) {
@@ -124,6 +118,7 @@ adminRouter.put("/course", adminMiddleware, async function (req, res) {
   }
 });
 
+// Retrieve Courses
 adminRouter.get("/course/bulk", adminMiddleware, async (req, res) => {
   const adminId = req.userId;
 
@@ -132,7 +127,7 @@ adminRouter.get("/course/bulk", adminMiddleware, async (req, res) => {
 
     res.status(200).json({
       message: "Courses retrieved successfully.",
-      courses: courses,
+      courses,
     });
   } catch (error) {
     console.error(error);
@@ -141,5 +136,5 @@ adminRouter.get("/course/bulk", adminMiddleware, async (req, res) => {
 });
 
 module.exports = {
-  adminRouter: adminRouter,
+  adminRouter,
 };

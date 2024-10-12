@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 // const userModel = require("../db.js") // This will not work;
 const { userModel, purchaseModel, courseModel } = require("../db");
+const { userMiddleware } = require("../middlewares/user");
 
 userRouter.post("/signup", async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
@@ -70,22 +71,56 @@ userRouter.post("/signin", async function (req, res) {
   }
 });
 
-userRouter.get("/purchases", function (req, res) {
-  res.json({
-    message: "Purchased Courses Endpoint",
-  });
+userRouter.post("/purchase", userMiddleware, async (req, res) => {
+  const userId = req.userId;
+  const { courseId } = req.body;
+
+  // Validate courseId
+  if (!courseId) {
+    return res.status(400).json({ message: "Course ID is required." });
+  }
+
+  try {
+    await purchaseModel.create({
+      userId,
+      courseId,
+    });
+
+    res.status(201).json({
+      message: "You have successfully bought this course.",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
-userRouter.post("/signin", function (req, res) {
-  res.json({
-    message: "Signin Endpoint",
-  });
+// Course Preview Route
+userRouter.get("/preview", async (req, res) => {
+  try {
+    const courses = await courseModel.find({});
+
+    res.status(200).json({
+      courses: courses,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
-userRouter.get("/purchases", function (req, res) {
-  res.json({
-    message: "Purchased Courses Endpoint",
-  });
+userRouter.get("/purchases", userMiddleware, async function (req, res) {
+  const userId = req.userId;
+  try {
+    const courses = await purchaseModel.find({ userId });
+
+    res.status(200).json({
+      purchases: purchases,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
 module.exports = {
