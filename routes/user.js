@@ -116,8 +116,13 @@ userRouter.get("/purchases", userMiddleware, async (req, res) => {
   const userId = req.userId;
   try {
     const purchases = await purchaseModel.find({ userId });
+
+    const coursesData = await courseModel.find({
+      _id: { $in: purchases.map((x) => x.courseId) },
+    });
     res.status(200).json({
       purchases,
+      coursesData,
     });
   } catch (error) {
     console.error(error);
