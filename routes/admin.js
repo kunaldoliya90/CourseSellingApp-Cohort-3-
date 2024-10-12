@@ -78,7 +78,7 @@ adminRouter.post("/course", adminMiddleware, async (req, res) => {
 
   try {
     const course = await courseModel.create({
-      title,            
+      title,
       description,
       price,
       imageUrl,
@@ -95,22 +95,49 @@ adminRouter.post("/course", adminMiddleware, async (req, res) => {
   }
 });
 
-adminRouter.get("/purchases", function (req, res) {
-  res.json({
-    message: "Purchased Courses Endpoint",
-  });
+adminRouter.put("/course", adminMiddleware, async function (req, res) {
+  const adminId = req.userId;
+  const { title, description, imageUrl, price, courseId } = req.body;
+
+  try {
+    const course = await courseModel.updateOne(
+      {
+        _id: courseId,
+        creatorId: adminId,
+      },
+      {
+        title,
+        description,
+        price,
+        imageUrl,
+        creatorId: adminId,
+      }
+    );
+
+    res.status(201).json({
+      message: "Course Updated successfully.",
+      courseId: course._id,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
-adminRouter.put("/course", function (req, res) {
-  res.json({
-    message: "Admin Course Creation Endpoint",
-  });
-});
+adminRouter.get("/course/bulk", adminMiddleware, async (req, res) => {
+  const adminId = req.userId;
 
-adminRouter.get("/course/bulk", function (req, res) {
-  res.json({
-    message: "Admin Course Creation Endpoint",
-  });
+  try {
+    const courses = await courseModel.find({ creatorId: adminId });
+    
+    res.status(200).json({
+      message: "Courses retrieved successfully.",
+      courses: courses,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
 module.exports = {
