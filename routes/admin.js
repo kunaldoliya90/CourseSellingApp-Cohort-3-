@@ -97,7 +97,7 @@ adminRouter.post("/course", adminMiddleware, async (req, res) => {
 
 adminRouter.put("/course", adminMiddleware, async function (req, res) {
   const adminId = req.userId;
-  const { title, description, imageUrl, price, courseId } = req.body;
+  const { title, description, price, imageUrl, courseId } = req.body;
 
   try {
     const course = await courseModel.updateOne(
@@ -129,7 +129,7 @@ adminRouter.get("/course/bulk", adminMiddleware, async (req, res) => {
 
   try {
     const courses = await courseModel.find({ creatorId: adminId });
-    
+
     res.status(200).json({
       message: "Courses retrieved successfully.",
       courses: courses,
