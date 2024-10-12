@@ -1,9 +1,10 @@
 const { Router } = require("express");
-const { adminModel } = require("../db");
+const { adminModel, courseModel } = require("../db");
 const user = require("./user");
 const adminRouter = Router();
 const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
+const { adminMiddleware } = require("../middlewares/admin");
 
 adminRouter.post("/signup", async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
@@ -57,7 +58,7 @@ adminRouter.post("/signin", async (req, res) => {
       return res.status(400).json({ message: "Invalid password." });
     }
 
-    const token = jwt.sign({ adminId: admin._id }, process.env.JWT_ADMIN_SECRET, {
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_ADMIN_SECRET, {
       expiresIn: "1h", // Token expiry time
     });
 
@@ -71,10 +72,27 @@ adminRouter.post("/signin", async (req, res) => {
   }
 });
 
-adminRouter.post("/course", function (req, res) {
-  res.json({
-    message: "Signin Endpoint",
-  });
+adminRouter.post("/course", adminMiddleware, async (req, res) => {
+  const adminId = req.userId;
+  const { title, description, imageUrl, price } = req.body;
+
+  try {
+    const course = await courseModel.create({
+      title,            
+      description,
+      price,
+      imageUrl,
+      creatorId: adminId,
+    });
+
+    res.status(201).json({
+      message: "Course created successfully.",
+      courseId: course._id,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
 adminRouter.get("/purchases", function (req, res) {
